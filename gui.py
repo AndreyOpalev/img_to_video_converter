@@ -87,6 +87,7 @@ class MainGUI(Frame):
         self.log_widget = ScrolledText(self.frm, font=("consolas", "12", "normal"))
         self.log_widget.grid(row=6, column=0, columnspan=2, sticky="nsew")
         sys.stdout = StdoutRedirector(self.log_widget)
+        sys.stderr = sys.stdout
 
     def enable(self):
         self.generate_button["state"] = "normal"
@@ -108,6 +109,7 @@ class MainGUI(Frame):
         folder_path = self.folder_label.cget("text")
         #image_width_mm = float(self.image_width_entry.get())
         #capture_interval_s = int(self.capture_interval_entry.get())
+        video_time_s = int(self.video_time_entry.get())
 
         image_width_mm = 4.7
         capture_interval_s = 10
@@ -115,6 +117,7 @@ class MainGUI(Frame):
         converter.generate_img_to_video(folder_path,
                                         image_width_mm,
                                         capture_interval_s,
+                                        video_time_s,
                                         self.observer)
         
 if __name__ == "__main__":

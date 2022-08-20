@@ -18,10 +18,11 @@ class Time:
 
         return "{:02}:{:02}:{:02}".format(h, m, s)
 
-def generate_img_to_video(folder, pixels_per_cm, frame_interval_s, observer = None):
+def generate_img_to_video(folder, pixels_per_cm, capture_interval_s, video_time_s, observer = None):
     print("Folder to process: {}.".format(folder))
     print("Width of the image, mm: {}.".format(pixels_per_cm))
-    print("Time interva, seconds: {}.".format(frame_interval_s))
+    print("Capture interval, s: {}.".format(capture_interval_s))
+    print("Video time, s: {}.".format(video_time_s))
 
     files = glob.glob(folder + '/*.JPG')
     files.sort()
@@ -31,7 +32,7 @@ def generate_img_to_video(folder, pixels_per_cm, frame_interval_s, observer = No
     height, width, layers = img.shape
     print("Image size: {}x{}.".format(width, height))
     
-    # Calculate desired video resolution    
+    # Calculate desired video resolution.
     dwidth = 1024
     scale_ration = dwidth / width
     dheight = int(height * scale_ration)
@@ -62,20 +63,25 @@ def generate_img_to_video(folder, pixels_per_cm, frame_interval_s, observer = No
     pbar = None
     if observer is None:
         pbar = tqdm.tqdm(total = len(files))
-    
-    # TODO: Parallelize it. Timestamps can-be computed before, as
+
+    # Compute FPS to correspond the requested video time
+    fps = int(len(files) / video_time_s)
+    fps = min(fps, 60)
+    print("FPS: {}.".format(fps))
+        
     # well as text positions
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     video=cv2.VideoWriter('video.mp4',
                           fourcc,
-                          24,
+                          fps,
                           (dwidth, dheight))
-    
+
+    start = time.time()
     for file_name in files:
         print("Proccessing: {}.".format(file_name));
         
         img = cv2.imread(file_name)
-        img = cv2.resize(img, (dwidth, dheight), interpolation = cv2.INTER_AREA)
+        img = cv2.resize(img, (dwidth, dheight))
 
         # Draw the scale bar.
         # pt1 and pt2 can be calculated outside
@@ -105,13 +111,16 @@ def generate_img_to_video(folder, pixels_per_cm, frame_interval_s, observer = No
 
         video.write(img)
 
-        time_stamp.increment(frame_interval_s)
+        time_stamp.increment(capture_interval_s)
 
         # Updated status bar
         if pbar is not None:
             pbar.update(1)
 
     video.release()
+
+    end = time.time()
+    print("Processing time: {}.".format(end-start))
 
     # Notify it's done
     observer.done()
