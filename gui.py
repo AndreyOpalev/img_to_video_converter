@@ -24,24 +24,23 @@ class StdoutRedirector(object):
     # Needed for file like object
     def flush(self):
         pass
-        # force refresh of the widget to be sure that thing are displayed
-        # self.text_space.update_idletasks()
 
 class Observer(object):
 
     def __init__(self, main_gui):
         self.gui = main_gui
 
+    # Updated how many images were processed since previous call of
+    # update().
     def update(self, value):
         pass
-        #percentage = int((value / self.max_val) * 100.0)
-        #self.pbar['value'] += percentage
-        #self.pbar.update_idletasks()
 
+    # Notify that the processing is complete
     def done(self):
         print("Done!")
         self.gui.enable()
 
+    # Set max number of image to process
     def set_max(self, max_value):
         pass
         #self.max_val = max_value
@@ -81,10 +80,6 @@ class MainGUI(Frame):
         video_time_label.grid(row=3, column=0, sticky="w", padx=5, pady=5)
         self.video_time_entry = ttk.Entry(self.frm)
         self.video_time_entry.grid(row=3, column=1, sticky="ew", padx=5, pady=5)
-
-        #self.pbar = ttk.Progressbar(self.frm, orient=tkinter.HORIZONTAL, length = 100, mode='determinate')
-        #self.pbar.grid(row=4, column=0, columnspan=2, sticky="nsew")
-        #self.pbar_updater = TkProgressBarUpdater(self.pbar)
 
         self.generate_button = ttk.Button(self.frm, text="Generate", command=self.start_generation_in_thread)
         self.generate_button.grid(row=5, column=1, sticky="e")
