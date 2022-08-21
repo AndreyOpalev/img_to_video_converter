@@ -3,6 +3,7 @@ import sys, glob, os
 import tqdm
 import subprocess
 import time
+import pathlib
 
 class Time:
     def __init__(self):
@@ -103,12 +104,11 @@ def generate_img_to_video(folder : str,
     color = (255, 255, 255)
     color_bg = (0, 0, 0)
 
-    # Create a temporal folder for modified images
-    if not os.path.exists('tmp'):
-        os.mkdir('tmp')
-
+    # Create a time stamp object which serves as a source for
+    # time stamp text on the image
     time_stamp = Time()
 
+    # Create tqdm bar (works in console)
     pbar = None
     if observer is None:
         pbar = tqdm.tqdm(total = len(files))
@@ -119,8 +119,9 @@ def generate_img_to_video(folder : str,
     print("FPS: {}.".format(fps))
         
     # well as text positions
+    p = pathlib.Path(folder)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video=cv2.VideoWriter('video.mp4',
+    video=cv2.VideoWriter(str(p.with_suffix('.mp4')),
                           fourcc,
                           fps,
                           (dwidth, dheight))
