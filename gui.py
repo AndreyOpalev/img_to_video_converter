@@ -83,7 +83,7 @@ class MainGUI(Frame):
         folder_button.grid(row=0, column=0, sticky="w", padx=5, pady=5)
         
         self.folder_label = ttk.Label(self.frm, text="")
-        Self.folder_label.grid(row=0, column=1, sticky="ew", padx=5, pady=5)
+        self.folder_label.grid(row=0, column=1, sticky="ew", padx=5, pady=5)
 
         total_image_width = ttk.Label(self.frm,
                                       text="Observable width (ex. \"200 um\"):")
