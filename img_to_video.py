@@ -114,14 +114,15 @@ def generate_img_to_video(folder : str,
         pbar = tqdm.tqdm(total = len(files))
 
     # Compute FPS to correspond the requested video time
-    fps = int(len(files) / video_time_s)
+    fps = int(round(len(files) / video_time_s))
     fps = min(fps, 60)
     print("FPS: {}.".format(fps))
         
     # well as text positions
     p = pathlib.Path(folder)
+    video_filename = str(p.with_suffix('.mp4')
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video=cv2.VideoWriter(str(p.with_suffix('.mp4')),
+    video=cv2.VideoWriter(video_filename,
                           fourcc,
                           fps,
                           (dwidth, dheight))
@@ -174,7 +175,8 @@ def generate_img_to_video(folder : str,
 
     end = time.time()
     print("Processing time: {}.".format(end-start))
-
+    print("Video file: {}.".format(video_filename))
+    
     # Notify it's done
     observer.done()
 
