@@ -106,8 +106,13 @@ class MainGUI(Frame):
         self.video_time_entry = ttk.Entry(self.frm)
         self.video_time_entry.grid(row=4, column=1, sticky="ew", padx=5, pady=5)
 
-        self.generate_button = ttk.Button(self.frm, text="Generate", command=self.start_generation_in_thread)
-        self.generate_button.grid(row=5, column=1, sticky="e")
+        self.generate_button = ttk.Button(self.frm, text="Generate",
+                                          command=self.start_generation_in_thread)
+        self.generate_button.grid(row=5, column=1, sticky="w")
+
+        self.stop_button = ttk.Button(self.frm, text="Stop",
+                                      command=self.stop)
+        self.stop_button.grid(row=5, column=1, sticky="e")
         
         self.log_widget = ScrolledText(self.frm, font=("consolas", "12", "normal"))
         self.log_widget.grid(row=6, column=0, columnspan=2, sticky="nsew")
@@ -126,9 +131,11 @@ class MainGUI(Frame):
         sys.stderr = sys.__stderr__
 
     def start_generation_in_thread(self):
+        self.is_stop_requested = False
         self.generate_button["state"] = "disabled"
         threaded = threading.Thread(target=self.start_generation)
         threaded.start()
+        
 
     def start_generation(self):
         folder_path = self.folder_label.cget("text")
@@ -143,12 +150,25 @@ class MainGUI(Frame):
                                         capture_interval_s,
                                         video_time_s,
                                         scale_bar_width,
+                                        self.if_stop_requested,
                                         self.observer)
+    def if_stop_requested(self):
+        return self.is_stop_requested
+
+    # We can avoid caring about race condition
+    def stop(self):
+        self.is_stop_requested = True
+
+#def on_closing():
+#    if tkinter.messagebox.askokcancel("Quit", "Do you want to quit?"):
+#        root.destroy()
         
 if __name__ == "__main__":
     root = Tk();
     root.wm_title("Images to Video conversion")
     app = MainGUI(root)
     root.resizable(False, False)
+#    root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
+    app.stop()
 

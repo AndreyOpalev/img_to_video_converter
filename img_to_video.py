@@ -58,6 +58,7 @@ def generate_img_to_video(folder : str,
                           capture_interval_s : float,
                           video_time_s : float,
                           scale_bar_width : Width,
+                          check_if_stop_requested,
                           observer = None):
     
     assert observable_width > scale_bar_width
@@ -164,6 +165,9 @@ def generate_img_to_video(folder : str,
         # Updated status bar
         if pbar is not None:
             pbar.update(1)
+
+        if check_if_stop_requested():
+            break
 
     video.release()
 
