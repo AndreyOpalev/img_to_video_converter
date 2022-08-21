@@ -18,9 +18,53 @@ class Time:
 
         return "{:02}:{:02}:{:02}".format(h, m, s)
 
-def generate_img_to_video(folder, pixels_per_cm, capture_interval_s, video_time_s, observer = None):
+class Width:
+    # It expects formats "1 mm" or "50 um" or "
+    def __init__(self, text):
+
+        # Get the last 2 characters
+        self.units = text[-2:]
+        self.full_text = text
+
+        # Convert to meters. The substring will be either "4.7" or
+        # "4.7 ". It's ok for conversion to float
+        val = float(text[:-2])
+        if self.units == "mm":
+            val = val * 10e-3
+        elif self.units == "um":
+            val = val * 10e-6
+        elif self.units == "cm":
+            val = val * 10e-2
+        else:
+            print("Unkown units: \"{}\".".format(text))
+                
+        self.width = val
+
+    def text(self):
+        return self.full_text
+
+    def value(self):
+        return self.width
+
+    def __gt__(self, other):
+        if (self.width > other.width):
+            return True
+        else:
+            return False
+
+
+def generate_img_to_video(folder : str,
+                          observable_width : Width,
+                          capture_interval_s : float,
+                          video_time_s : float,
+                          scale_bar_width : Width,
+                          observer = None):
+    
+    assert observable_width > scale_bar_width
+    
     print("Folder to process: {}.".format(folder))
-    print("Width of the image, mm: {}.".format(pixels_per_cm))
+    print("Observable width: {}.".format(observable_width.text))
+    print("Scale bar width: {}.".format(scale_bar_width.text))
     print("Capture interval, s: {}.".format(capture_interval_s))
     print("Video time, s: {}.".format(video_time_s))
 
@@ -37,10 +81,14 @@ def generate_img_to_video(folder, pixels_per_cm, capture_interval_s, video_time_
     scale_ration = dwidth / width
     dheight = int(height * scale_ration)
 
-    # TODO: Consider different length of scale bars    
     # Calculate the width of a scale bar
-    scale_bar_width = round(dwidth / pixels_per_cm) # num. of pixel that 1 mm takes    
-    print("1 mm takes {} pixels.".format(scale_bar_width))
+    
+    scale_bar_width_px = round((dwidth / observable_width.value()) *
+                               scale_bar_width.value())
+                  
+    print("{} takes {} pixels.".format(scale_bar_width.text(),
+                                       scale_bar_width_px))
+          
 
     # Margins for drawings
     h_margin = 20
@@ -85,21 +133,21 @@ def generate_img_to_video(folder, pixels_per_cm, capture_interval_s, video_time_
 
         # Draw the scale bar.
         # pt1 and pt2 can be calculated outside
-        pt1 = (dwidth - scale_bar_width - h_margin,
+        pt1 = (dwidth - scale_bar_width_px - h_margin,
                dheight - v_margin + scale_bar_height)
-        pt2 = (pt1[0] + scale_bar_width,
+        pt2 = (pt1[0] + scale_bar_width_px,
                pt1[1] - scale_bar_height)
         # dwidth - h_margin, dheight - v_margin)
         img = cv2.rectangle(img, pt1, pt2, color, cv2.FILLED)
 
         # Draw the unit text below the bar
-        text_size, _ = cv2.getTextSize('1 mm', font, fontscale * 0.5, 1)
+        text_size, _ = cv2.getTextSize(scale_bar_width.text(), font, fontscale * 0.5, 1)
         text_w, text_h = text_size
 
-        org = (dwidth - int(scale_bar_width / 2) - int(text_w / 2) - h_margin,
+        org = (dwidth - int(scale_bar_width_px / 2) - int(text_w / 2) - h_margin,
                pt1[1] + scale_bar_height + text_h)
         
-        img = cv2.putText(img, '1 mm', org, font, fontscale * 0.5, color, 1, cv2.LINE_AA)
+        img = cv2.putText(img, scale_bar_width.text(), org, font, fontscale * 0.5, color, 1, cv2.LINE_AA)
 
         # Draw the time
         org = (0 + h_margin, 0 + v_margin)
@@ -125,9 +173,9 @@ def generate_img_to_video(folder, pixels_per_cm, capture_interval_s, video_time_
     # Notify it's done
     observer.done()
 
-if __name__ == '__main__':
-    path = sys.argv[1]
-    dwidth = float(sys.argv[2])
-    frame_interval = int(sys.argv[3])
+#if __name__ == '__main__':
+#    path = sys.argv[1]
+#    dwidth = float(sys.argv[2])
+#    frame_interval = int(sys.argv[3])
 
-    sys.exit(generate_img_to_video(path, dwidth, frame_interval))
+#    sys.exit(generate_img_to_video(path, dwidth, frame_interval))

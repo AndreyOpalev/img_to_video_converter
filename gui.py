@@ -25,6 +25,25 @@ class StdoutRedirector(object):
     def flush(self):
         pass
 
+# In case of error, we'd like to keep gui_responsive and allow
+# it to re-run the generation
+class StderrRedirector(object):
+    # Pass reference to the text widget
+    def __init__(self, text_widget, main_gui):
+        self.text_space = text_widget
+        self.main_gui = main_gui
+
+    # Write text and scroll to end
+    def write(self,string):
+        self.text_space.insert('end', string)
+        self.text_space.see('end')
+        self.main_gui.enable()
+        
+    # Needed for file like object
+    def flush(self):
+        pass
+    
+
 class Observer(object):
 
     def __init__(self, main_gui):
@@ -60,26 +79,32 @@ class MainGUI(Frame):
         # self.frm.columnconfigure(0, weight=1)
         self.frm.columnconfigure(1, weight=1)
         
-        folder_button = ttk.Button(self.frm, text="Fodler...", command=self.select_folder)
+        folder_button = ttk.Button(self.frm, text="Folder...", command=self.select_folder)
         folder_button.grid(row=0, column=0, sticky="w", padx=5, pady=5)
         
         self.folder_label = ttk.Label(self.frm, text="/Users/andlev/Workspace/ImageDropletsToVideo/1min")
         self.folder_label.grid(row=0, column=1, sticky="ew", padx=5, pady=5)
 
-        total_image_width = ttk.Label(self.frm, text="Image width, mm:")
+        total_image_width = ttk.Label(self.frm,
+                                      text="Observable width (ex. \"200 um\"):")
         total_image_width.grid(row=1, column=0, sticky="w", padx=5, pady=5)
         self.image_width_entry = ttk.Entry(self.frm)
         self.image_width_entry.grid(row=1, column=1, sticky="ew", padx=5, pady=5)
 
+        unit_width = ttk.Label(self.frm, text="Scaler bar width (ex. \"50 um\"):")
+        unit_width.grid(row=2, column=0, sticky="w", padx=5, pady=5)
+        self.unit_width_entry = ttk.Entry(self.frm)
+        self.unit_width_entry.grid(row=2, column=1, sticky="ew", padx=5, pady=5)
+
         capture_interval_label = ttk.Label(self.frm, text="Capture interval, s:")
-        capture_interval_label.grid(row=2, column=0, sticky="w", padx=5, pady=5)
+        capture_interval_label.grid(row=3, column=0, sticky="w", padx=5, pady=5)
         self.capture_interval_entry = ttk.Entry(self.frm)
-        self.capture_interval_entry.grid(row=2, column=1, sticky="ew", padx=5, pady=5)
+        self.capture_interval_entry.grid(row=3, column=1, sticky="ew", padx=5, pady=5)
 
         video_time_label = ttk.Label(self.frm, text="Video time (approx.), s:")
-        video_time_label.grid(row=3, column=0, sticky="w", padx=5, pady=5)
+        video_time_label.grid(row=4, column=0, sticky="w", padx=5, pady=5)
         self.video_time_entry = ttk.Entry(self.frm)
-        self.video_time_entry.grid(row=3, column=1, sticky="ew", padx=5, pady=5)
+        self.video_time_entry.grid(row=4, column=1, sticky="ew", padx=5, pady=5)
 
         self.generate_button = ttk.Button(self.frm, text="Generate", command=self.start_generation_in_thread)
         self.generate_button.grid(row=5, column=1, sticky="e")
@@ -87,7 +112,7 @@ class MainGUI(Frame):
         self.log_widget = ScrolledText(self.frm, font=("consolas", "12", "normal"))
         self.log_widget.grid(row=6, column=0, columnspan=2, sticky="nsew")
         sys.stdout = StdoutRedirector(self.log_widget)
-        sys.stderr = sys.stdout
+        sys.stderr = StderrRedirector(self.log_widget, self)
 
     def enable(self):
         self.generate_button["state"] = "normal"
@@ -107,17 +132,17 @@ class MainGUI(Frame):
 
     def start_generation(self):
         folder_path = self.folder_label.cget("text")
-        #image_width_mm = float(self.image_width_entry.get())
-        #capture_interval_s = int(self.capture_interval_entry.get())
+        capture_interval_s = int(self.capture_interval_entry.get())
         video_time_s = int(self.video_time_entry.get())
 
-        image_width_mm = 4.7
-        capture_interval_s = 10
-        
+        observable_width = converter.Width(self.image_width_entry.get())
+        scale_bar_width = converter.Width(self.unit_width_entry.get())
+
         converter.generate_img_to_video(folder_path,
-                                        image_width_mm,
+                                        observable_width,
                                         capture_interval_s,
                                         video_time_s,
+                                        scale_bar_width,
                                         self.observer)
         
 if __name__ == "__main__":
