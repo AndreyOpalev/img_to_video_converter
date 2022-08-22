@@ -120,7 +120,7 @@ def generate_img_to_video(folder : str,
         
     # well as text positions
     p = pathlib.Path(folder)
-    video_filename = str(p.with_suffix('.mp4')
+    video_filename = str(p.with_suffix('.mp4'))
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     video=cv2.VideoWriter(video_filename,
                           fourcc,
