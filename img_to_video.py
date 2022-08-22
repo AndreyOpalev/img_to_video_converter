@@ -70,7 +70,18 @@ def generate_img_to_video(folder : str,
     print("Capture interval, s: {}.".format(capture_interval_s))
     print("Video time, s: {}.".format(video_time_s))
 
-    files = glob.glob(folder + '/*.JPG')
+    # The folder should contain files of only one extension, but extensions
+    # can be different.
+    extensions = ('*.TIF', '*.tif', '*.JPG', '*.jpg', '*.JPEG', '*.jpeg')
+    files = []
+    for e in extensions:
+        files.extend(glob.glob(folder + "/" + e))
+
+    if len(files) == 0:
+        print("No files found")
+        observer.done()
+        return
+
     files.sort()
     
     # Get image resolution
