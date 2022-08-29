@@ -82,8 +82,8 @@ class MainGUI(Frame):
         folder_button = ttk.Button(self.frm, text="Folder...", command=self.select_folder)
         folder_button.grid(row=0, column=0, sticky="w", padx=5, pady=5)
         
-        self.folder_label = ttk.Label(self.frm, text="")
-        self.folder_label.grid(row=0, column=1, sticky="ew", padx=5, pady=5)
+        self.folder_entry = ttk.Entry(self.frm)
+        self.folder_entry.grid(row=0, column=1, sticky="ew", padx=5, pady=5)
 
         total_image_width = ttk.Label(self.frm,
                                       text="Observable width (ex. \"200 um\"):")
@@ -130,7 +130,7 @@ class MainGUI(Frame):
         
     def select_folder(self):
         directory = filedialog.askdirectory(initialdir = "./")
-        self.folder_label.configure(text = directory)
+        self.folder_entry.insert(0, directory)
 
     def reset_logging(self):
         sys.stdout = sys.__stdout__
@@ -144,7 +144,7 @@ class MainGUI(Frame):
         
 
     def start_generation(self):
-        folder_path = self.folder_label.cget("text")
+        folder_path = self.folder_entry.get()
         capture_interval_s = int(self.capture_interval_entry.get())
         video_time_s = int(self.video_time_entry.get())
         start_time = self.start_time_entry.get()
