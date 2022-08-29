@@ -4,11 +4,22 @@ import tqdm
 import subprocess
 import time
 import pathlib
+import time
 
 class Time:
-    def __init__(self):
-        self.seconds = 0
     
+    @staticmethod
+    def to_seconds(h, m, s):
+        return h * 3600 + m * 60 + s 
+    
+    # As 1st arguments it expectes the stirng HH:mm:ss
+    def __init__(self, *args):
+        self.seconds = 0
+
+        if len(args) > 0:
+            t = time.strptime(args[0], "%H:%M:%S")
+            self.seconds = Time.to_seconds(t.tm_hour, t.tm_min, t.tm_sec)
+
     def increment(self, seconds):
         self.seconds = self.seconds + seconds
 
@@ -58,6 +69,7 @@ def generate_img_to_video(folder : str,
                           observable_width : Width,
                           capture_interval_s : float,
                           video_time_s : float,
+                          start_time : str,
                           scale_bar_width : Width,
                           check_if_stop_requested,
                           observer = None):
@@ -117,7 +129,7 @@ def generate_img_to_video(folder : str,
 
     # Create a time stamp object which serves as a source for
     # time stamp text on the image
-    time_stamp = Time()
+    time_stamp = Time(start_time)
 
     # Create tqdm bar (works in console)
     pbar = None

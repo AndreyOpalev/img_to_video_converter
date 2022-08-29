@@ -106,16 +106,22 @@ class MainGUI(Frame):
         self.video_time_entry = ttk.Entry(self.frm)
         self.video_time_entry.grid(row=4, column=1, sticky="ew", padx=5, pady=5)
 
+        start_time_label = ttk.Label(self.frm, text="Start time:")
+        start_time_label.grid(row=5, column=0, sticky="w", padx=5, pady=5)
+        self.start_time_entry = ttk.Entry(self.frm)
+        self.start_time_entry.grid(row=5, column=1, sticky="ew", padx=5, pady=5)
+        self.start_time_entry.insert(0, "00:00:00")
+
         self.generate_button = ttk.Button(self.frm, text="Generate",
                                           command=self.start_generation_in_thread)
-        self.generate_button.grid(row=5, column=1, sticky="w")
+        self.generate_button.grid(row=6, column=1, sticky="w")
 
         self.stop_button = ttk.Button(self.frm, text="Stop",
                                       command=self.stop)
-        self.stop_button.grid(row=5, column=1, sticky="e")
+        self.stop_button.grid(row=6, column=1, sticky="e")
         
         self.log_widget = ScrolledText(self.frm, font=("consolas", "12", "normal"))
-        self.log_widget.grid(row=6, column=0, columnspan=2, sticky="nsew")
+        self.log_widget.grid(row=7, column=0, columnspan=2, sticky="nsew")
         sys.stdout = StdoutRedirector(self.log_widget)
         sys.stderr = StderrRedirector(self.log_widget, self)
 
@@ -141,6 +147,7 @@ class MainGUI(Frame):
         folder_path = self.folder_label.cget("text")
         capture_interval_s = int(self.capture_interval_entry.get())
         video_time_s = int(self.video_time_entry.get())
+        start_time = self.start_time_entry.get()
 
         observable_width = converter.Width(self.image_width_entry.get())
         scale_bar_width = converter.Width(self.unit_width_entry.get())
@@ -149,6 +156,7 @@ class MainGUI(Frame):
                                         observable_width,
                                         capture_interval_s,
                                         video_time_s,
+                                        start_time,
                                         scale_bar_width,
                                         self.if_stop_requested,
                                         self.observer)
