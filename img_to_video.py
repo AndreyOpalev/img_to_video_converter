@@ -24,9 +24,9 @@ class Time:
         self.seconds = self.seconds + seconds
 
     def to_str(self):
-        h = int(self.seconds / 60 / 60)
+        h = int(self.seconds / 3600)
         m = int(self.seconds / 60) - h * 60
-        s = self.seconds - h * 60 * 60 - m * 60
+        s = self.seconds - h * 3600 - m * 60
 
         return "{:02}:{:02}:{:02}".format(h, m, s)
 
@@ -151,8 +151,9 @@ def generate_img_to_video(folder : str,
                           (dwidth, dheight))
 
     start = time.time()
+    n_file_processed = 0;
     for file_name in files:
-        print("Proccessing: {}.".format(file_name));
+        print("Proccessing #{}: {}.".format(n_file_processed, file_name));
         
         img = cv2.imread(file_name)
         img = cv2.resize(img, (dwidth, dheight))
@@ -193,6 +194,8 @@ def generate_img_to_video(folder : str,
 
         if check_if_stop_requested():
             break
+
+        n_file_processed += 1
 
     video.release()
 
