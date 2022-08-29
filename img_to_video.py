@@ -84,7 +84,7 @@ def generate_img_to_video(folder : str,
 
     # The folder should contain files of only one extension, but extensions
     # can be different.
-    extensions = ('*.TIF', '*.tif', '*.JPG', '*.jpg', '*.JPEG', '*.jpeg')
+    extensions = ('*.tif', '*.jpg', '*.jpeg')
     files = []
     for e in extensions:
         files.extend(glob.glob(folder + "/" + e))
