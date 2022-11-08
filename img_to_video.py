@@ -96,7 +96,7 @@ def generate_img_to_video(folder : str,
         return
 
     # Sort as int, not string
-    files.sort(key=lambda s: int(re.findall(r'\d+', s)[0]))
+    files.sort(key=lambda s: int(re.findall(r'\d+', s)[-1]))
 
     # Get image resolution
     img = cv2.imread((files[0]))
