@@ -5,6 +5,7 @@ import subprocess
 import time
 import pathlib
 import time
+import re
 
 class Time:
     
@@ -94,8 +95,9 @@ def generate_img_to_video(folder : str,
         observer.done()
         return
 
-    files.sort()
-    
+    # Sort as int, not string
+    files.sort(key=lambda s: int(re.findall(r'\d+', s)[0]))
+
     # Get image resolution
     img = cv2.imread((files[0]))
     height, width, layers = img.shape
