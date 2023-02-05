@@ -2,6 +2,8 @@ from enum import Enum
 import re
 import os
 
+# Configurable number of digits in the index of file
+gIndexLength = 4
 
 class States(Enum):
     SelectFolder = 1
@@ -50,6 +52,10 @@ if __name__ == '__main__':
                     continue
 
                 index_str = found_digits[-1]
+                if len(index_str) == gIndexLength:
+                    # Don't print if the index is ok, just skip.
+                    continue
+
                 index = int(index_str)
 
                 # Generate a new name
@@ -57,7 +63,7 @@ if __name__ == '__main__':
                 start_pos = search_res.start()
                 end_pos = search_res.end()
                 new_name = '{}{}{}'.format(filename[:start_pos],
-                                           f"{index:04}",
+                                           '{num:0{w}}'.format(num=index, w=gIndexLength),
                                            filename[end_pos:])
 
                 # Rename
